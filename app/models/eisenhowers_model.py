@@ -5,11 +5,10 @@ from app.configs.database import db
 
 @dataclass
 class Eisenhowers(db.Model):
-    id: Integer
     type: String
 
     __tablename__ = 'eisenhowers'
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True)
     type = Column(String(100))
 
     tasks = db.relationship('Task', backref='eisenhowers', uselist=False)

@@ -1,4 +1,3 @@
-
 from http import HTTPStatus
 from flask import jsonify
 from app.models.categories_model import Categories
@@ -11,21 +10,28 @@ session: Session = db.session
 
 
 def get_all():
-    all_categories_task = session.query(Categories, Task, Eisenhowers).filter(
-        Task.eisenhower_id == Eisenhowers.id).all()
+    all_categories_task = (
+        session.query(Categories, Task, Eisenhowers)
+        .filter(Task.eisenhower_id == Eisenhowers.id)
+        .all()
+    )
 
     result = []
 
     for categories, tasks, eisenhowers in all_categories_task:
-        result.append({
-            "id": categories.id,
-            "name": categories.name,
-            "description": categories.description,
-            "tasks": [{
-                "id": tasks.id,
-                "name": tasks.name,
-                "description": tasks.description,
-                "classifiction": eisenhowers.type,
-            }]
-        })
+        result.append(
+            {
+                'id': categories.id,
+                'name': categories.name,
+                'description': categories.description,
+                'tasks': [
+                    {
+                        'id': tasks.id,
+                        'name': tasks.name,
+                        'description': tasks.description,
+                        'classifiction': eisenhowers.type,
+                    }
+                ],
+            }
+        )
     return jsonify(result), HTTPStatus.OK

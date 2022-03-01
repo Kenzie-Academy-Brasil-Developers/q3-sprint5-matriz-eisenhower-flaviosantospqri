@@ -9,7 +9,7 @@ from sqlalchemy.orm.session import Session
 from app.exceptions.exc import InvalidDataError, NumberNotValid
 from app.models.categories_model import Categories
 from app.models.eisenhowers_model import Eisenhowers
-
+from app.controllers import eisenhower
 from app.models.task_model import Task
 from sqlalchemy.exc import IntegrityError
 
@@ -17,6 +17,9 @@ session: Session = db.session
 
 
 def create_task():
+    if session.query(Eisenhowers).count() <= 0:
+        eisenhower()
+
     try:
         data = request.get_json()
         do_it = (
@@ -95,6 +98,8 @@ def create_task():
 
 
 def update_task(id):
+    if session.query(Eisenhowers).count() <= 0:
+        eisenhower()
     try:
         data = request.get_json()
 
@@ -127,17 +132,17 @@ def update_task(id):
         for key, value in valid_data.items():
             setattr(current_task, key, value)
 
-        if current_task.importance == 1 and current_task.urgency == 1:
-            current_task.eisenhower_id = do_it.id
+            if current_task.importance == 1 and current_task.urgency == 1:
+                current_task.eisenhower_id = do_it.id
 
-        elif current_task.importance == 1 and current_task.urgency == 2:
-            current_task.eisenhower_id = delegate_it.id
+            elif current_task.importance == 1 and current_task.urgency == 2:
+                current_task.eisenhower_id = delegate_it.id
 
-        elif current_task.importance == 2 and current_task.urgency == 1:
-            current_task.eisenhower_id = schedule_it.id
+            elif current_task.importance == 2 and current_task.urgency == 1:
+                current_task.eisenhower_id = schedule_it.id
 
-        else:
-            current_task.eisenhower_id = delete_it.id
+            else:
+                current_task.eisenhower_id = delete_it.id
 
         session.add(current_task)
         session.commit()
@@ -151,8 +156,8 @@ def update_task(id):
             .get(current_task.eisenhower_id)
             .type,
         }, HTTPStatus.OK
-    except:
-        return {'message': 'not found'}, HTTPStatus.NOT_FOUND
+    except NumberNotValid:
+        return {'error': {'valid_options': {'importance': [1, 2], 'urgency': [1, 2]}, 'recieved_optios': {'importance': data['importance'], 'urgency': data['urgency']}}}, 404
 
 
 def delete_task(id):

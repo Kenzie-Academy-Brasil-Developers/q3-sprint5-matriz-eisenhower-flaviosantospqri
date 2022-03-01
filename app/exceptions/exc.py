@@ -11,8 +11,7 @@ class NumberNotValid(Exception):
         self.message = [
             {
                 'valid_options': self.valid_options,
-                'recieved_options': recieved_options
-
+                'recieved_options': recieved_options,
             }
         ]
         super().__init__(self.message)
